@@ -20,14 +20,44 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Create token
  *
  * @param object $user \WP_User object
+ * @param string $context Context (email|email_code|sms|sms_code) @since 2.4
  *
  * @return string
  */
-function create_user_token( $user ) {
-	$settings     = get_settings(); // phpcs:ignore
-	$tokens       = get_user_meta( $user->ID, TOKEN_USER_META, true );
-	$tokens       = is_string( $tokens ) ? array( $tokens ) : $tokens;
-	$new_token    = sha1( wp_generate_password() );
+function create_user_token( $user, $context = 'email' ) {
+	$settings  = get_settings(); // phpcs:ignore
+	$tokens    = get_user_meta( $user->ID, TOKEN_USER_META, true );
+	$tokens    = is_string( $tokens ) ? array( $tokens ) : $tokens;
+	$new_token = sha1( wp_generate_password() );
+
+	switch ( $context ) {
+		case 'sms':
+			// helps to keep url link short due to 300 char limit for most of the SMS providers
+			$new_token = substr( $new_token, 0, 12 );
+			break;
+		case 'sms_code':
+			// 6-digit PIN for SMS
+			$new_token = wp_rand( 100000, 999999 );
+			break;
+		case 'email_code':
+			$new_token = strtoupper( substr( str_shuffle( 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' ), 0, 10 ) );
+			break;
+	}
+
+	/**
+	 * Filter the token
+	 *
+	 * @hook   magic_login_create_user_token
+	 *
+	 * @param  {string} $new_token New token
+	 * @param  {int} $user->ID User ID
+	 * @param  {string} $context Context
+	 *
+	 * @return {string} New value
+	 * @since  2.4
+	 */
+	$new_token = apply_filters( 'magic_login_create_user_token', $new_token, $user->ID, $context );
+
 	$hashed_token = hash_hmac( 'sha256', $new_token, wp_salt() );
 
 	$ip = sha1( get_client_ip() );
@@ -54,12 +84,16 @@ function create_user_token( $user ) {
 /**
  * Create login link for given user
  *
- * @param object $user WP_User object
+ * @param object $user    WP_User object
+ * @param string $context Context (email|email_code|sms|sms_code) @since 2.4
+ * @param string $redirect_to Redirect URL
  *
  * @return mixed|string
  */
-function create_login_link( $user ) {
-	$token = create_user_token( $user );
+function create_login_link( $user, $context = 'email', $redirect_to = null ) {
+	global $magic_login_token;
+	$token             = create_user_token( $user, $context );
+	$magic_login_token = $token;
 
 	$query_args = array(
 		'user_id'     => $user->ID,
@@ -71,7 +105,26 @@ function create_login_link( $user ) {
 		$query_args['redirect_to'] = urlencode( wp_unslash( $_POST['redirect_to'] ) ); // phpcs:ignore
 	}
 
+	if ( ! empty( $redirect_to ) ) {
+		$query_args['redirect_to'] = urlencode( $redirect_to );
+	}
+
 	$login_url = esc_url_raw( add_query_arg( $query_args, wp_login_url() ) );
+
+	/**
+	 * Filter the login URL
+	 *
+	 * @hook   magic_login_create_login_link
+	 *
+	 * @param  {string} $login_url Login URL
+	 * @param  {object} $user WP_User object
+	 * @param  {string} $context Context
+	 * @param  {string} $redirect_to Redirect URL
+	 *
+	 * @return {string} New value
+	 * @since  2.4
+	 */
+	$login_url = apply_filters( 'magic_login_create_login_link', $login_url, $user, $context, $redirect_to );
 
 	return $login_url;
 }
@@ -132,18 +185,27 @@ function get_settings() {
 		'enable_ajax'                   => false,
 		'enable_woo_integration'        => false,
 		'woo_position'                  => 'before',
+		'enable_woo_customer_login'     => false,
+		'woo_customer_login_position'   => 'before',
+		'enable_edd_checkout'           => false,
+		'edd_checkout_position'         => 'edd_before_purchase_form',
+		'enable_edd_login'              => false,
+		'edd_login_position'            => 'before',
 		'registration'                  => [
-			'enable'               => false,
-			'mode'                 => 'auto', // or standard|shortcode
-			'fallback_email_field' => true, // show email field on auto registration mode as a fallback
-			'show_name_field'      => true,
-			'require_name_field'   => true,
-			'show_terms_field'     => false,
-			'require_terms_field'  => false,
-			'terms'                => '',
-			'send_email'           => true,
-			'email_subject'        => esc_html__( 'Welcome to {{SITENAME}}', 'magic-login' ),
-			'email_content'        => get_default_registration_email_text(),
+			'enable'                    => false,
+			'mode'                      => 'auto', // or standard|shortcode
+			'fallback_email_field'      => true, // show email field on auto registration mode as a fallback
+			'show_name_field'           => true,
+			'require_name_field'        => true,
+			'show_terms_field'          => false,
+			'require_terms_field'       => false,
+			'terms'                     => '',
+			'send_email'                => true,
+			'email_subject'             => esc_html__( 'Welcome to {{SITENAME}}', 'magic-login' ),
+			'email_content'             => get_default_registration_email_text(),
+			'enable_domain_restriction' => false,
+			'allowed_domains'           => '',
+			'role'                      => '',
 		],
 		'spam_protection'               => [
 			'service'             => 'recaptcha',
@@ -151,7 +213,7 @@ function get_settings() {
 			'enable_registration' => false,
 		],
 		'recaptcha'                     => [
-			'type'         => 'v3',
+			'type'         => 'v3', // which version to use
 			'v2_checkbox'  => [
 				'site_key'   => '',
 				'secret_key' => '',
@@ -170,6 +232,28 @@ function get_settings() {
 			'secret_key' => '',
 		],
 		'enable_rest_api'               => false,
+		'sms'                           => [
+			'enable'                           => false,
+			'provider'                         => 'twilio',
+			'twilio'                           => [
+				'account_sid' => '',
+				'auth_token'  => '',
+				'from'        => '',
+			],
+			/**
+			 * phone_only: Only send SMS if the user enters their phone number (instead of email) when logging in.
+			 * sms_and_email: If the user has a phone number linked to their account, send both SMS and email.
+			 * sms_or_email: Always send SMS if the user has a phone number, but do not send email notifications.
+			 */
+			'sms_sending_strategy'             => 'phone_only',
+			'wp_registration'                  => false,
+			'wp_require_phone'                 => false,
+			'magic_registration'               => false,
+			'magic_registration_require_phone' => false,
+			'login_message'                    => esc_html__( 'Your login code is here: {{MAGIC_LOGIN_CODE}} Your code will expire in {{EXPIRES_WITH_INTERVAL}}', 'magic-login' ),
+			'send_registration_message'        => false,
+			'registration_message'             => esc_html__( 'Welcome {{FULL_NAME}}! 🎉 Your account on {{SITENAME}} has been created. You can login here: {{MAGIC_LINK}}.', 'magic-login' ),
+		],
 	];
 
 	if ( MAGIC_LOGIN_IS_NETWORK ) {
@@ -416,7 +500,7 @@ function get_doc_url( $path = null, $fragment = '' ) {
 }
 
 /**
- * Check weather current screen is magic login settings page or not
+ * Check whether current screen is magic login settings page or not
  *
  * @return bool
  * @since 1.2.1
@@ -590,4 +674,25 @@ All at {{SITENAME}}<br>
 	);
 
 	return $email_text;
+}
+
+
+/**
+ * Get user by log input
+ *
+ * @param string $input Input. It can be username, email or phone number
+ *
+ * @return false|mixed|\WP_User|null
+ * @since 2.4
+ */
+function get_user_by_log_input( $input ) {
+	$user = get_user_by( 'login', $input );
+
+	if ( ! defined( 'MAGIC_LOGIN_USERNAME_ONLY' ) || false === MAGIC_LOGIN_USERNAME_ONLY ) {
+		if ( ! $user && strpos( $input, '@' ) ) {
+			$user = get_user_by( 'email', $input );
+		}
+	}
+
+	return $user;
 }

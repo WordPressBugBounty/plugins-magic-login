@@ -7,6 +7,8 @@
 
 namespace MagicLogin\Shortcode;
 
+use MagicLogin\CodeLogin;
+use MagicLogin\LoginManager;
 use function MagicLogin\Core\style_url;
 use function MagicLogin\Login\process_login_request;
 
@@ -76,7 +78,7 @@ function shortcode_login_form( $shortcode_atts ) {
 
 	$form_action = apply_filters( 'magic_login_shortcode_form_action', '' );
 
-	$login_request = process_login_request( $atts );
+	$login_request = LoginManager::process_login_request( $atts );
 	$button_text   = ! empty( $atts['button_text'] ) ? $atts['button_text'] : esc_html__( 'Send me the link', 'magic-login' );
 	?>
 	<div id="magic-login-shortcode">
@@ -105,7 +107,9 @@ function shortcode_login_form( $shortcode_atts ) {
 			}
 			?>
 		</div>
-		<?php if ( $login_request['show_form'] ) : ?>
+		<?php if ( $login_request['code_login'] ) : ?>
+			<?php CodeLogin::code_form(); ?>
+		<?php elseif ( $login_request['show_form'] ) : ?>
 			<form name="magicloginform"
 				  class="magic-login-inline-login-form <?php echo esc_attr( $atts['class'] ); ?>"
 				  id="magicloginform"
@@ -161,8 +165,8 @@ function shortcode_login_form( $shortcode_atts ) {
  * @return mixed
  */
 function maybe_shortcode_redirect( $redirect_url, $user ) {
-	if ( isset( $_GET['redirect_to'] ) && $_GET['redirect_to'] ) { // phpcs:ignore
-		$redirect_url = esc_url_raw( $_GET['redirect_to'] ); // phpcs:ignore
+	if ( isset( $_REQUEST['redirect_to'] ) && $_REQUEST['redirect_to'] ) { // phpcs:ignore
+		$redirect_url = esc_url_raw( $_REQUEST['redirect_to'] ); // phpcs:ignore
 	}
 
 	return $redirect_url;
