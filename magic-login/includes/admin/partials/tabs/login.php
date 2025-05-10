@@ -706,7 +706,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						)
 					);
 					?>
-					<span class="sui-description"><?php esc_html_e( 'Supported placeholders: {{SITEURL}}, {{USERNAME}}, {{FIRST_NAME}}, {{LAST_NAME}}, {{FULL_NAME}}, {{DISPLAY_NAME}}, {{USER_EMAIL}, {{SITENAME}}, {{EXPIRES}}, {{MAGIC_LINK}}, {{EXPIRES_WITH_INTERVAL}}, {{TOKEN_VALIDITY_COUNT}}', 'magic-login' ); ?></span>
+					<span class="sui-description"><?php esc_html_e( 'Supported placeholders: {{SITEURL}}, {{USERNAME}}, {{FIRST_NAME}}, {{LAST_NAME}}, {{FULL_NAME}}, {{DISPLAY_NAME}}, {{USER_EMAIL}, {{SITENAME}}, {{EXPIRES}}, {{MAGIC_LINK}}, {{MAGIC_LOGIN_QR}}, {{MAGIC_LOGIN_QR_IMG}}, {{EXPIRES_WITH_INTERVAL}}, {{TOKEN_VALIDITY_COUNT}}', 'magic-login' ); ?></span>
 				</div>
 			</div>
 		</div>
@@ -908,19 +908,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<span id="enable-rest-api-form-label" class="sui-toggle-label"><?php esc_html_e( 'Enable REST API.', 'magic-login' ); ?></span>
 
 				</label>
-			</div>
-		</div>
-	</div>
-
-	<!-- Reset Tokens -->
-	<div class="sui-box-settings-row">
-		<div class="sui-box-settings-col-1">
-			<span class="sui-settings-label"><?php esc_html_e( 'Reset Tokens', 'magic-login' ); ?></span>
-			<span id="reset-tokens" class="sui-description"><?php esc_html_e( 'If you want to clean all tokens at once click to reset button.', 'magic-login' ); ?></span>
-		</div>
-		<div class="sui-box-settings-col-2">
-			<div class="sui-form-field">
-				<input type="submit" name="reset_tokens" id="reset_tokens" aria-describedby="reset-tokens" class="sui-button sui-button-ghost" value="<?php echo esc_attr( __( 'Reset', 'magic-login' ) ); ?>">
 			</div>
 		</div>
 	</div>

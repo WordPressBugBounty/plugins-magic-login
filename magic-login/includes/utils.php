@@ -106,7 +106,7 @@ function create_login_link( $user, $context = 'email', $redirect_to = null ) {
 	}
 
 	if ( ! empty( $redirect_to ) ) {
-		$query_args['redirect_to'] = urlencode( $redirect_to );
+		$query_args['redirect_to'] = rawurlencode( $redirect_to );
 	}
 
 	$login_url = esc_url_raw( add_query_arg( $query_args, wp_login_url() ) );
@@ -206,6 +206,8 @@ function get_settings() {
 			'enable_domain_restriction' => false,
 			'allowed_domains'           => '',
 			'role'                      => '',
+			'enable_redirection'        => false,
+			'redirection_url'           => '',
 		],
 		'spam_protection'               => [
 			'service'             => 'recaptcha',
@@ -578,8 +580,8 @@ function get_email_placeholders_by_user( $user, $login_link ) {
 	$ttl      = get_ttl_by_user( $user->ID );
 
 	list( $token_ttl, $selected_interval ) = get_ttl_with_interval( $ttl );
-	$selected_interval_str = strtolower( $selected_interval );
-	$allowed_intervals     = get_allowed_intervals();
+	$selected_interval_str                 = strtolower( $selected_interval );
+	$allowed_intervals                     = get_allowed_intervals();
 
 	if ( isset( $allowed_intervals[ $selected_interval ] ) ) {
 		$selected_interval_str = strtolower( $allowed_intervals[ $selected_interval ] ); // translated interval
@@ -600,7 +602,6 @@ function get_email_placeholders_by_user( $user, $login_link ) {
 		'{{MAGIC_LINK}}'            => $login_link,
 		'{{MAGIC_LOGIN_CODE}}'      => $magic_login_token,
 	];
-
 
 	/**
 	 * Filter the email placeholders
