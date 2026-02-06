@@ -136,6 +136,8 @@ function create_login_link( $user, $context = 'email', $redirect_to = null ) {
  * @return mixed
  */
 function get_client_ip() {
+	$adds = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+
 	/**
 	 * `HTTP_X_FORWARDED_FOR` removed in 1.5
 	 * Filters the ip address
@@ -147,7 +149,7 @@ function get_client_ip() {
 	 * @return {string} New value.
 	 * @since  1.5
 	 */
-	return apply_filters( 'magic_login_client_ip', $_SERVER['REMOTE_ADDR'] ); // phpcs:ignore
+	return apply_filters( 'magic_login_client_ip', $adds );
 }
 
 /**
@@ -234,6 +236,8 @@ function get_settings() {
 			'secret_key' => '',
 		],
 		'enable_rest_api'               => false,
+		'enable_api_rate_limit'         => false,
+		'rate_limit_max_requests'       => 60,
 		'sms'                           => [
 			'enable'                           => false,
 			'provider'                         => 'twilio',
@@ -742,4 +746,39 @@ function get_token_validity_by_user( $user_id ) {
 	 * @since  2.6
 	 */
 	return apply_filters( 'magic_login_token_validity_by_user', $validity, $user_id );
+}
+
+
+/**
+ * Get required capability to access admin menu/settings page
+ *
+ * @since 2.6.2
+ * @return string
+ */
+function get_settings_capability() {
+	$capability = MAGIC_LOGIN_IS_NETWORK ? 'manage_network_options' : 'manage_options';
+
+	/**
+	 * Filter the capability required to access the Magic Login settings page.
+	 *
+	 * @hook       magic_login_admin_menu_cap
+	 *
+	 * @param string $capability The capability required to access the settings page.
+	 *
+	 * @return string Altered value.
+	 * @deprecated 2.6.2 Use 'magic_login_settings_capability' instead.
+	 */
+	$capability = apply_filters( 'magic_login_admin_menu_cap', $capability );
+
+	/**
+	 * Filter the capability required to access the Magic Login settings page.
+	 *
+	 * @hook  magic_login_settings_capability
+	 *
+	 * @param string $capability The capability required to access the settings page.
+	 *
+	 * @return string Altered value.
+	 * @since 2.6.2
+	 */
+	return apply_filters( 'magic_login_settings_capability', $capability );
 }

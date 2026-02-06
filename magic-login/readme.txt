@@ -2,9 +2,9 @@
 Contributors:      handyplugins, m_uysl
 Tags:              login, passwordless, passwordless-login, magic-login, magic-link
 Requires at least: 5.0
-Tested up to:      6.8
+Tested up to:      6.9
 Requires PHP:      7.4
-Stable tag:        2.6
+Stable tag:        2.6.2
 License:           GPLv2 or later
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 Donate link:       https://handyplugins.co/donate/
@@ -120,6 +120,16 @@ However, if you wish to alter this behavior, you can easily do so by passing an 
 4. Login Block
 
 == Changelog ==
+
+= 2.6.2 (Nov 14, 2025) =
+* [Added] Admin notice when placeholder encryption keys/salts are in use.
+* [Fixed] Added capability checks for the settings page.
+* [Fixed] Improved validation of $_SERVER variables.
+* [Improved] Settings import file validation.
+
+= 2.6.1 (Nov 05, 2025) =
+* [Updated] Dependencies.
+* Tested with WP 6.9
 
 = 2.6 (Jul 22, 2025) =
 * [Added] Ability to override TTL and token validity on a per-user basis.
