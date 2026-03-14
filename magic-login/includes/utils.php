@@ -40,7 +40,13 @@ function create_user_token( $user, $context = 'email' ) {
 			$new_token = wp_rand( 100000, 999999 );
 			break;
 		case 'email_code':
-			$new_token = strtoupper( substr( str_shuffle( 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' ), 0, 10 ) );
+			$charset        = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+			$charset_length = strlen( $charset ) - 1;
+			$new_token      = '';
+
+			for ( $i = 0; $i < 10; $i++ ) {
+				$new_token .= $charset[ wp_rand( 0, $charset_length ) ];
+			}
 			break;
 	}
 
@@ -127,6 +133,29 @@ function create_login_link( $user, $context = 'email', $redirect_to = null ) {
 	$login_url = apply_filters( 'magic_login_create_login_link', $login_url, $user, $context, $redirect_to );
 
 	return $login_url;
+}
+
+/**
+ * Localize the frontend script with AJAX nonce data.
+ *
+ * @return void
+ */
+function localize_frontend_script() {
+	static $localized = false;
+
+	if ( $localized ) {
+		return;
+	}
+
+	wp_localize_script(
+		'magic-login-frontend',
+		'magicLoginFrontend',
+		[
+			'ajaxNonce' => wp_create_nonce( 'magic-login-ajax-request' ),
+		]
+	);
+
+	$localized = true;
 }
 
 /**
@@ -234,6 +263,11 @@ function get_settings() {
 		'cf_turnstile'                  => [
 			'site_key'   => '',
 			'secret_key' => '',
+		],
+		'friendly_captcha'              => [
+			'site_key'   => '',
+			'secret_key' => '',
+			'endpoint'   => 'global',
 		],
 		'enable_rest_api'               => false,
 		'enable_api_rate_limit'         => false,

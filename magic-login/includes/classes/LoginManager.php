@@ -140,6 +140,16 @@ class LoginManager {
 			);
 		}
 
+		if ( false === check_ajax_referer( 'magic-login-ajax-request', 'magic_login_ajax_nonce', false ) ) {
+			wp_send_json_error(
+				[
+					'message'                => esc_html__( 'Invalid request', 'magic-login' ),
+					'show_form'              => true,
+					'show_registration_form' => false,
+				]
+			);
+		}
+
 		parse_str( wp_unslash( $_POST['data'] ), $form_data ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$global_data = [ 'log', 'redirect_to', 'g-recaptcha-response', 'cf-turnstile-response' ];
@@ -821,6 +831,7 @@ class LoginManager {
 
 		$redirect_to    = apply_filters( 'login_redirect', $redirect_to, $requested_redirect_to, $user );
 		$login_redirect = apply_filters( 'magic_login_redirect', $redirect_to, $user );
+		$login_redirect = wp_validate_redirect( $login_redirect, home_url() );
 
 		// Return early if in code login mode.
 		if ( $code_login ) {
