@@ -46,7 +46,7 @@ function setup() {
  * @see https://wpmudev.github.io/shared-ui/installation/
  */
 function add_sui_admin_body_class( $classes ) {
-	$classes .= ' sui-2-12-24 ';
+	$classes .= ' sui-2-12-27 ';
 
 	return $classes;
 }
@@ -105,7 +105,6 @@ function save_settings() {
 
 	$nonce = filter_input( INPUT_POST, 'magic_login_settings', FILTER_SANITIZE_SPECIAL_CHARS );
 	if ( wp_verify_nonce( $nonce, 'magic_login_settings' ) ) {
-
 		// if it's export settings
 		if ( isset( $_POST['magic_login_form_action'] ) && 'export_settings' === $_POST['magic_login_form_action'] ) {
 			export_settings();
@@ -137,13 +136,15 @@ function save_settings() {
 			return;
 		}
 
-		$settings                     = [];
-		$settings['is_default']       = boolval( filter_input( INPUT_POST, 'is_default' ) );
-		$settings['add_login_button'] = boolval( filter_input( INPUT_POST, 'add_login_button' ) );
-		$settings['token_ttl']        = absint( filter_input( INPUT_POST, 'token_ttl' ) );
-		$settings['token_validity']   = absint( filter_input( INPUT_POST, 'token_validity' ) );
-		$settings['auto_login_links'] = boolval( filter_input( INPUT_POST, 'auto_login_links' ) );
-		$settings['enable_ajax']      = boolval( filter_input( INPUT_POST, 'enable_ajax' ) );
+		$settings                                       = [];
+		$settings['is_default']                         = boolval( filter_input( INPUT_POST, 'is_default' ) );
+		$settings['add_login_button']                   = boolval( filter_input( INPUT_POST, 'add_login_button' ) );
+		$settings['token_ttl']                          = absint( filter_input( INPUT_POST, 'token_ttl' ) );
+		$settings['token_validity']                     = absint( filter_input( INPUT_POST, 'token_validity' ) );
+		$settings['auto_login_links']                   = boolval( filter_input( INPUT_POST, 'auto_login_links' ) );
+		$settings['enable_ajax']                        = boolval( filter_input( INPUT_POST, 'enable_ajax' ) );
+		$settings['spam_protection']                    = [];
+		$settings['spam_protection']['enable_honeypot'] = boolval( filter_input( INPUT_POST, 'enable_spam_protection_honeypot' ) );
 
 		// convert TTL in minute
 		if ( isset( $_POST['token_ttl'] ) && $_POST['token_ttl'] > 0 && isset( $_POST['token_interval'] ) ) {

@@ -4,7 +4,7 @@ Tags:              login, passwordless, passwordless-login, magic-login, magic-l
 Requires at least: 5.0
 Tested up to:      7.0
 Requires PHP:      7.4
-Stable tag:        2.7.1
+Stable tag:        2.8
 License:           GPLv2 or later
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 Donate link:       https://handyplugins.co/donate/
@@ -24,6 +24,7 @@ Streamline the login process by sending links to your users. No more passwords t
 - **Passwordless Authentication**: No more forgotten passwords or complex requirements.
 - **Magic Links**: Secure, unique links sent directly to users' email inboxes.
 - **Auto Login**: Support for auto-login links in outgoing emails. It's useful when pending action from a user, such as reply a comment, complete the checkout, etc.
+- **Native Honeypot Protection**: Add a lightweight, no-CAPTCHA spam protection layer to Magic Login forms.[Learn more](https://handyplugins.co/docs/honeypot-protection/)
 - **User-Friendly**: Simplifies the login process for all users.
 - **Enhanced Security**: Reduces risks associated with weak passwords.
 - **Tools**:  Export, import, and reset plugin settings easily from the admin panel or WP-CLI. [Learn more](https://handyplugins.co/docs/magic-login-tools/)
@@ -70,12 +71,14 @@ Bug reports and pull requests are welcome on [GitHub](https://github.com/HandyPl
 
 __If you like Magic Login, then consider checking out our other projects:__
 
-* <a href="https://handyplugins.co/magic-login-pro/" rel="friend">Magic Login Pro</a> – Easy, secure, and passwordless authentication for WordPress.
-* <a href="https://handyplugins.co/easy-text-to-speech/" rel="friend">Easy Text-to-Speech for WordPress</a> – Transform your textual content into high-quality synthesized speech with Amazon Polly.
-* <a href="https://handyplugins.co/handywriter/" rel="friend">Handywriter</a> – AI-powered writing assistant that can help you create content for your WordPress.
-* <a href="https://handyplugins.co/paddlepress-pro/" rel="friend">PaddlePress PRO</a> – Paddle Plugin for WordPress
-* <a href="https://poweredcache.com/" rel="friend">Powered Cache</a> – Caching and Optimization for WordPress – Easily Improve PageSpeed & Web Vitals Score
-* <a href="https://handyplugins.co/wp-accessibility-toolkit/" rel="friend">WP Accessibility Toolkit</a> – A collection of tools to help you make your WordPress more accessible.
+<a href="https://handyplugins.co/magic-login-pro/" rel="friend">Magic Login Pro</a> – Easy, secure, and passwordless authentication for WordPress.
+* <a href="https://handyplugins.co/sessionquota-pro/" rel="friend">SessionQuota Pro</a> – Limit concurrent sessions in WordPress.
+* <a href="https://handyplugins.co/stream-integration-pro/" rel="friend">Stream Integration Pro</a> – Upload, sync, restore, and manage WordPress videos with Cloudflare Stream.
+* <a href="https://handyplugins.co/easy-text-to-speech/" rel="friend">Easy Text-to-Speech</a> – Convert written content into high-quality synthesized speech for WordPress.
+* <a href="https://handyplugins.co/handywriter/" rel="friend">Handywriter</a> – AI-powered writing assistant for WordPress.
+* <a href="https://handyplugins.co/paddlepress-pro/" rel="friend">PaddlePress PRO</a> – Paddle plugin for WordPress.
+* <a href="https://handyplugins.co/wp-accessibility-toolkit/" rel="friend">WP Accessibility Toolkit</a> – Tools to help make your WordPress site more accessible.
+* <a href="https://poweredcache.com/" rel="friend">Powered Cache</a> – Caching and optimization for WordPress to help improve PageSpeed and Core Web Vitals.
 
 
 == Installation ==
@@ -112,6 +115,10 @@ You can use `[magic_login_form]` shortcode or block. [Learn More.](https://handy
 This behavior occurs because the magic login form is designed to use the current page as the target redirection URL by default. It's a way to ensure a smooth user experience by bringing users back to the page they started from.
 However, if you wish to alter this behavior, you can easily do so by passing an empty redirect_to="" parameter within the shortcode.  [Learn More.](https://handyplugins.co/docs/magic-login-shortcode/)
 
+= Can developers adjust honeypot timing? =
+
+Yes. Developers can use the `magic_login_honeypot_config` filter to adjust the minimum and maximum form age checks used by the native honeypot layer.
+
 
 == Screenshots ==
 
@@ -121,6 +128,10 @@ However, if you wish to alter this behavior, you can easily do so by passing an 
 4. Login Block
 
 == Changelog ==
+
+= 2.8 (May 07, 2026) =
+* [Added] Native honeypot protection for Magic Login forms.
+* [Updated] Dependencies.
 
 = 2.7.1 (Mar 15, 2026) =
 * [Fixed] Settings import failing on some sites due to restricted MIME type filters when uploading JSON files.
