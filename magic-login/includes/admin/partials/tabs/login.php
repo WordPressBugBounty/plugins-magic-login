@@ -23,7 +23,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // phpcs:disable WordPress.WhiteSpace.PrecisionAlignment.Found
 // phpcs:disable Generic.WhiteSpace.DisallowSpaceIndent.SpacesUsed
-// phpcs:disable WordPress.WP.I18n.MissingTranslatorsComment
 
 ?>
 <div role="tabpanel" tabindex="0" id="login_content" class="sui-tab-content magic-login-main-tab-content active" aria-labelledby="login__tab">
@@ -495,8 +494,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 								'max' => 600,
 							),
 						);
+						$brute_force_inputs = array();
 						foreach ( $brute_force_fields as $field => $args ) {
-							${$field . '_input'} = sprintf(
+							$brute_force_inputs[ $field ] = sprintf(
 								'<input
 															id="%1$s"
 															name="%1$s"
@@ -512,12 +512,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 								absint( $settings[ $field ] )
 							);
 						}
-						/* translators: 1: Ban duration input 2: Trial count input 3: Interval input */
 						printf(
+							/* translators: 1: Ban duration input 2: Trial count input 3: Interval input */
 							__( 'Block the IP address for %1$s minutes when it fails to login %2$s times in %3$s minutes.', 'magic-login' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							$brute_force_bantime_input, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							$brute_force_login_attempt_input, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							$brute_force_login_time_input // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							$brute_force_inputs['brute_force_bantime'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							$brute_force_inputs['brute_force_login_attempt'], // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							$brute_force_inputs['brute_force_login_time'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						?>
 					</div>

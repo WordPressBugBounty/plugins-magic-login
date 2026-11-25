@@ -395,15 +395,18 @@ class LoginManager {
 		$excluded_subjects = apply_filters(
 			'magic_login_auto_login_excluded_subjects',
 			[
-				__( '[%s] New Admin Email Address' ),
-				__( '[%s] Network Admin Email Change Request' ),
-				__( '[%s] Admin Email Changed' ),
-				__( '[%s] Notice of Network Admin Email Change' ),
-				__( '[%s] Login Details' ),
-				__( '[%s] Password Reset' ),
-				__( '[%s] Password Changed' ),
-				__( '[%s] Email Change Request' ),
-				__( 'Your login confirmation code' ),
+				// These intentionally use WP core's own "default" text domain (not 'magic-login')
+				// because they must match the untranslated/core-translated subjects WP core itself
+				// sends, not a magic-login-specific translation.
+				__( '[%s] New Admin Email Address', 'default' ),
+				__( '[%s] Network Admin Email Change Request', 'default' ),
+				__( '[%s] Admin Email Changed', 'default' ),
+				__( '[%s] Notice of Network Admin Email Change', 'default' ),
+				__( '[%s] Login Details', 'default' ),
+				__( '[%s] Password Reset', 'default' ),
+				__( '[%s] Password Changed', 'default' ),
+				__( '[%s] Email Change Request', 'default' ),
+				__( 'Your login confirmation code', 'default' ),
 			]
 		);
 
@@ -630,7 +633,7 @@ class LoginManager {
 		$login_url = get_wp_login_url();
 
 		if ( isset( $_GET['redirect_to'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$login_url = esc_url_raw( add_query_arg( 'redirect_to', urlencode( $_GET['redirect_to'] ), $login_url ) ); // phpcs:ignore
+			$login_url = esc_url_raw( add_query_arg( 'redirect_to', urlencode( wp_unslash( $_GET['redirect_to'] ) ), $login_url ) ); // phpcs:ignore
 		}
 
 		?>
@@ -720,7 +723,7 @@ class LoginManager {
 		do_action( 'magic_login_handle_login_request' );
 		// Use a generic error message to ensure user ids can't be sniffed
 		$user_id = (int) $_GET['user_id']; //phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$token   = $_GET['token']; //phpcs:ignore
+		$token   = wp_unslash( $_GET['token'] ); //phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		self::authenticate_user_token( $user_id, $token );
 	}
 
@@ -835,7 +838,7 @@ class LoginManager {
 
 		// Determine redirect URL.
 		$redirect_to           = get_user_default_redirect( $user );
-		$requested_redirect_to = isset( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] ) ? $_REQUEST['redirect_to'] : ''; // phpcs:ignore
+		$requested_redirect_to = isset( $_REQUEST['redirect_to'] ) && is_string( $_REQUEST['redirect_to'] ) ? wp_unslash( $_REQUEST['redirect_to'] ) : ''; // phpcs:ignore
 
 		$redirect_to    = apply_filters( 'login_redirect', $redirect_to, $requested_redirect_to, $user );
 		$login_redirect = apply_filters( 'magic_login_redirect', $redirect_to, $user );
@@ -976,7 +979,7 @@ class LoginManager {
 			<p class="submit">
 				<input type="submit" name="wp-submit" id="wp-submit" style="float: none;width: 100%;" class="magic-login-submit button button-primary button-hero" value="<?php esc_attr_e( 'Send me the link', 'magic-login' ); ?>" />
 				<?php if ( isset( $_GET['redirect_to'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
-					<input type="hidden" name="redirect_to" value="<?php echo esc_url( $_GET['redirect_to'] ); // phpcs:ignore ?>">
+					<input type="hidden" name="redirect_to" value="<?php echo esc_url( wp_unslash( $_GET['redirect_to'] ) ); // phpcs:ignore ?>">
 				<?php endif; ?>
 				<input type="hidden" name="testcookie" value="1" />
 			</p>
@@ -1175,7 +1178,9 @@ class LoginManager {
 			if ( false !== stripos( $header, 'text/html' ) ) {
 				// convert line breaks to br when content type is html but
 				// input doesn't contain HTML tags (adding <br/> can ruin the templating)
-				if ( strip_tags( $login_email, '<a>' ) === $login_email ) {
+				// wp_strip_all_tags() has no allowed-tags argument, and the default email
+				// template legitimately contains an <a> link, so the native function is required here.
+				if ( strip_tags( $login_email, '<a>' ) === $login_email ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags
 					$login_email = nl2br( $login_email );
 				}
 				break;

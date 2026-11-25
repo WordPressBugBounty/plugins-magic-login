@@ -148,7 +148,7 @@ function save_settings() {
 
 		// convert TTL in minute
 		if ( isset( $_POST['token_ttl'] ) && $_POST['token_ttl'] > 0 && isset( $_POST['token_interval'] ) ) {
-			switch ( $_POST['token_interval'] ) {
+			switch ( sanitize_text_field( wp_unslash( $_POST['token_interval'] ) ) ) {
 				case 'DAY':
 					$settings['token_ttl'] = absint( $_POST['token_ttl'] ) * 1440;
 					break;
@@ -161,7 +161,7 @@ function save_settings() {
 			}
 		}
 
-		$token_interval    = sanitize_text_field( filter_input( INPUT_POST, 'token_interval' ) );
+		$token_interval    = sanitize_text_field( filter_input( INPUT_POST, 'token_interval' ) ?? '' );
 		$allowed_intervals = get_allowed_intervals();
 
 		if ( isset( $allowed_intervals[ $token_interval ] ) ) {
